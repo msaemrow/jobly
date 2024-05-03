@@ -73,12 +73,14 @@ function ensureUserAuthorization(req, res, next) {
   try {
     if (!res.locals.user) throw new UnauthorizedError(); // Ensure user is logged in
 
-    const isAdmin = res.locals.user.is_admin;
+    const isAdmin = res.locals.user.isAdmin;
     const isSameUser = req.params.username === res.locals.user.username;
 
-    if (!isAdmin && !isSameUser) throw new UnauthorizedError(); // Check if user is admin or same user
+    if (isAdmin || isSameUser) return next();
+      
+    throw new UnauthorizedError(); // Check if user is admin or same user
 
-    return next();
+
   } catch (err) {
     return next(err);
   }
