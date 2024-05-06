@@ -140,6 +140,7 @@ describe("GET /users", function () {
           lastName: "U1L",
           email: "user1@user.com",
           isAdmin: false,
+          jobs: [null]
         },
         {
           username: "u2",
@@ -147,6 +148,7 @@ describe("GET /users", function () {
           lastName: "U2L",
           email: "user2@user.com",
           isAdmin: true,
+          jobs: [null]
         },
         {
           username: "u3",
@@ -154,6 +156,7 @@ describe("GET /users", function () {
           lastName: "U3L",
           email: "user3@user.com",
           isAdmin: false,
+          jobs: [null]
         },
       ],
     });
@@ -199,6 +202,7 @@ describe("GET /users/:username", function () {
         lastName: "U1L",
         email: "user1@user.com",
         isAdmin: false,
+        jobs: [null]
       },
     });
   });
@@ -215,6 +219,7 @@ describe("GET /users/:username", function () {
           lastName: "U1L",
           email: "user1@user.com",
           isAdmin: false,
+          jobs: [null]
         },
       });
     });
@@ -353,3 +358,31 @@ describe("DELETE /users/:username", function () {
     expect(resp.statusCode).toEqual(404);
   });
 });
+
+/************************************** POST /users/:username/jobs/:id */
+describe("POST /users/:username/jobs/:id", function(){
+  test("creates new job application for user when logged user is the same as user that submitted", async () => {
+    const job1Result = await db.query(`SELECT * FROM jobs WHERE title='job1'`);
+    const job1 = job1Result.rows[0];
+    const res = await request(app)
+      .post(`/users/u1/jobs/${job1.id}`)
+      .set("authorization", `Bearer ${u1Token}`);
+    expect(res.statusCode).toEqual(200);
+  });
+  test("creates new job application for another user when logged in user is admin", async () => {
+    const job1Result = await db.query(`SELECT * FROM jobs WHERE title='job1'`);
+    const job1 = job1Result.rows[0];
+    const res = await request(app)
+      .post(`/users/u3/jobs/${job1.id}`)
+      .set("authorization", `Bearer ${u1Token}`);
+      expect(res.statusCode).toEqual(401);
+  });
+  test("returns unathorized error if user submitting application is not admin or same user", async () => {
+    const job1Result = await db.query(`SELECT * FROM jobs WHERE title='job1'`);
+    const job1 = job1Result.rows[0];
+    const res = await request(app)
+      .post(`/users/u3/jobs/${job1.id}`)
+      .set("authorization", `Bearer ${u1Token}`);
+      expect(res.statusCode).toEqual(401);
+  });
+})

@@ -49,7 +49,6 @@ function ensureLoggedIn(req, res, next) {
 
 function ensureAdminUser(req, res, next) {
   try {
-    console.log("User:", res.locals.user);
     if (!res.locals.user) {
       console.log("Unauthorized: User not found");
       throw new UnauthorizedError();

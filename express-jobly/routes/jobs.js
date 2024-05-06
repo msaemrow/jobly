@@ -9,8 +9,8 @@ const { BadRequestError } = require("../expressError");
 const { ensureLoggedIn, ensureAdminUser } = require("../middleware/auth");
 const Job = require("../models/job");
 
-// const companyNewSchema = require("../schemas/companyNew.json");
-// const companyUpdateSchema = require("../schemas/companyUpdate.json");
+const jobNewSchema = require("../schemas/jobNew.json");
+const jobUpdateSchema = require("../schemas/jobUpdate.json");
 
 const router = new express.Router();
 
@@ -26,11 +26,11 @@ const router = new express.Router();
 
 router.post("/", ensureAdminUser, async function (req, res, next) {
   try {
-    // const validator = jsonschema.validate(req.body, jobNewSchema);
-    // if (!validator.valid) {
-    //   const errs = validator.errors.map(e => e.stack);
-    //   throw new BadRequestError(errs);
-    // }
+    const validator = jsonschema.validate(req.body, jobNewSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
 
     const job = await Job.create(req.body);
     return res.status(201).json({ job });
@@ -50,7 +50,7 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
  * Authorization required: none
  */
 
-router.get("/", async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const titleFilter = req.query.title;
     const salaryFilter = parseInt(req.query.salary);
@@ -86,7 +86,7 @@ router.get("/", async function (req, res, next) {
 //  * Authorization required: none
 //  */
 
-router.get("/:id", async function (req, res, next) {
+router.get("/:id", ensureLoggedIn, async function (req, res, next) {
   try {
     const job = await Job.get(req.params.id);
     return res.json({ job });
@@ -108,6 +108,12 @@ router.get("/:id", async function (req, res, next) {
 
 router.patch("/:id", ensureAdminUser, async function (req, res, next) {
   try {
+    const validator = jsonschema.validate(req.body, jobUpdateSchema);
+    if (!validator.valid) {
+      const errs = validator.errors.map(e => e.stack);
+      throw new BadRequestError(errs);
+    }
+
     const job = await Job.update(req.params.id, req.body);
     return res.json({ job });
   } catch (err) {

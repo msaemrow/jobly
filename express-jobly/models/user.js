@@ -98,17 +98,21 @@ class User {
 
   /** Find all users.
    *
-   * Returns [{ username, first_name, last_name, email, is_admin }, ...]
+   * Returns [{ username, first_name, last_name, email, is_admin, jobs }, ...]
+   *    where jobs is [ job_id  ]
    **/
 
   static async findAll() {
     const result = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
+          `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin",
+                  array_agg(a.job_id) AS jobs
+           FROM users u
+           LEFT JOIN applications a ON u.username = a.username
+           GROUP BY u.username
            ORDER BY username`,
     );
 
@@ -118,20 +122,23 @@ class User {
   /** Given a username, return data about user.
    *
    * Returns { username, first_name, last_name, is_admin, jobs }
-   *   where jobs is { id, title, company_handle, company_name, state }
+   *   where jobs is [ job_id ]
    *
    * Throws NotFoundError if user not found.
    **/
 
   static async get(username) {
     const userRes = await db.query(
-          `SELECT username,
-                  first_name AS "firstName",
-                  last_name AS "lastName",
-                  email,
-                  is_admin AS "isAdmin"
-           FROM users
-           WHERE username = $1`,
+          `SELECT u.username,
+                  u.first_name AS "firstName",
+                  u.last_name AS "lastName",
+                  u.email,
+                  u.is_admin AS "isAdmin",
+                  array_agg(a.job_id) AS jobs
+           FROM users u
+           LEFT JOIN applications a ON u.username = a.username
+           WHERE u.username = $1
+           GROUP BY u.username`,
         [username],
     );
 
@@ -203,6 +210,34 @@ class User {
     const user = result.rows[0];
 
     if (!user) throw new NotFoundError(`No user: ${username}`);
+  }
+
+  /** Submit job application for user
+   *
+   * Returns { username, job_id }
+   *
+   **/
+
+  static async applyForJob(username, jobId){
+    const duplicateCheck = await db.query(
+      `SELECT username, job_id
+       FROM applications
+       WHERE username = $1 AND job_id = $2`,
+    [username, jobId],
+    );
+
+    if (duplicateCheck.rows[0]) {
+      throw new BadRequestError(`Duplicate application for username: ${username} and job_id: ${jobId}`);
+    }
+    const result = await db.query(`
+                            INSERT INTO applications
+                            (username, job_id)
+                            VALUES ($1, $2)
+                            RETURNING username, job_id`,
+                          [username, jobId]);
+    
+    const application = result.rows[0];
+    return application;
   }
 }
 

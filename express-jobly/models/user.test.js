@@ -117,6 +117,8 @@ describe("findAll", function () {
         lastName: "U1L",
         email: "u1@email.com",
         isAdmin: false,
+        jobs: [null]
+
       },
       {
         username: "u2",
@@ -124,6 +126,7 @@ describe("findAll", function () {
         lastName: "U2L",
         email: "u2@email.com",
         isAdmin: false,
+        jobs: [null]
       },
     ]);
   });
@@ -140,6 +143,7 @@ describe("get", function () {
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
+      jobs: [null]
     });
   });
 
@@ -228,3 +232,38 @@ describe("remove", function () {
     }
   });
 });
+
+/************************************** apply for job */
+describe("apply for job", function(){
+  test("works", async ()=> {
+    const u1Result = await db.query(`SELECT * FROM users WHERE username = 'u1'`);
+    const u1 = u1Result.rows[0];
+    const job1Result = await db.query(`SELECT * FROM jobs WHERE title='job1'`);
+    const job1 = job1Result.rows[0];
+
+    const application = await User.applyForJob(u1.username, job1.id);
+    const dbApplicationRes = await db.query("SELECT * FROM applications where username = 'u1'");
+    const dbApplication = dbApplicationRes.rows[0];
+    expect(application).toEqual(dbApplication)
+    });
+
+    test("bad request if job application already exists", async ()=> {
+      let u1;
+      let job1;
+      try{
+        const u1Result = await db.query(`SELECT * FROM users WHERE username = 'u1'`);
+        u1 = u1Result.rows[0];
+        const job1Result = await db.query(`SELECT * FROM jobs WHERE title='job1'`);
+        job1 = job1Result.rows[0];
+    
+        await User.applyForJob(u1.username, job1.id);
+
+        await User.applyForJob(u1.username, job1.id);
+        fail("Expected error but got none.");
+      } catch(err){
+        expect(err.message).toEqual(`Duplicate application for username: ${u1.username} and job_id: ${job1.id}`)
+      }
+    
+      });
+  });
+

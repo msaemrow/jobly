@@ -11,6 +11,7 @@ const User = require("../models/user");
 const { createToken } = require("../helpers/tokens");
 const userNewSchema = require("../schemas/userNew.json");
 const userUpdateSchema = require("../schemas/userUpdate.json");
+const db = require("../db");
 
 const router = express.Router();
 
@@ -117,6 +118,24 @@ router.delete("/:username", ensureUserAuthorization, async function (req, res, n
     return next(err);
   }
 });
+
+/** POST / { username }  => { username, job_id }
+ *
+ * Adds a new job applicatoin for a user. 
+ *
+ * This returns the created job application:
+ *  {applied: { username, job_id }
+ *
+ * Authorization required: login
+ **/
+router.post('/:username/jobs/:id', ensureUserAuthorization, async (req, res, next) => {
+  try{
+    const application = await User.applyForJob(req.params.username, req.params.id)
+    return res.json({"applied": application})
+  } catch(err){
+      return next(err)
+  }
+})
 
 
 module.exports = router;
