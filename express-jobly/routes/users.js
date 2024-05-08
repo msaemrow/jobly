@@ -52,7 +52,7 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
  * Authorization required: login
  **/
 
-router.get("/", ensureAdminUser, async function (req, res, next) {
+router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const users = await User.findAll();
     return res.json({ users });
@@ -66,7 +66,7 @@ router.get("/", ensureAdminUser, async function (req, res, next) {
  *
  * Returns { username, firstName, lastName, isAdmin }
  *
- * Authorization required: login
+ * Authorization required: must be same user or admin user
  **/
 
 router.get("/:username", ensureUserAuthorization, async function (req, res, next) {
@@ -86,7 +86,7 @@ router.get("/:username", ensureUserAuthorization, async function (req, res, next
  *
  * Returns { username, firstName, lastName, email, isAdmin }
  *
- * Authorization required: login
+ * Authorization required: must be same user or admin user
  **/
 
 router.patch("/:username", ensureUserAuthorization, async function (req, res, next) {
@@ -107,7 +107,7 @@ router.patch("/:username", ensureUserAuthorization, async function (req, res, ne
 
 /** DELETE /[username]  =>  { deleted: username }
  *
- * Authorization required: login
+ * Authorization required: must be same user or admin user
  **/
 
 router.delete("/:username", ensureUserAuthorization, async function (req, res, next) {
@@ -126,7 +126,7 @@ router.delete("/:username", ensureUserAuthorization, async function (req, res, n
  * This returns the created job application:
  *  {applied: { username, job_id }
  *
- * Authorization required: login
+ * Authorization required: must be same user or admin user
  **/
 router.post('/:username/jobs/:id', ensureUserAuthorization, async (req, res, next) => {
   try{

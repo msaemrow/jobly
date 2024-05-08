@@ -21,7 +21,7 @@ const router = new express.Router();
  *
  * Returns { id, title, salary, equity, company_handle }
  *
- * Authorization required: user has isAdmin permission
+ * Authorization required: logged in user has isAdmin permission
  */
 
 router.post("/", ensureAdminUser, async function (req, res, next) {
@@ -47,7 +47,7 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
  * - equity
  * - company-handle (will find case-insensitive and partial matches)
  *
- * Authorization required: none
+ * Authorization required: must be loggedin
  */
 
 router.get("/", ensureLoggedIn, async function (req, res, next) {
@@ -83,7 +83,7 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
 //  *
 //  *  Job is { title, salary, equity, company_handle }
 //  *
-//  * Authorization required: none
+//  * Authorization required: must be logged in
 //  */
 
 router.get("/:id", ensureLoggedIn, async function (req, res, next) {
@@ -103,7 +103,7 @@ router.get("/:id", ensureLoggedIn, async function (req, res, next) {
 //  *
 //  * Returns { id, title, salary, equity, company_handle }
 //  *
-//  * Authorization required: user has isAdmin permission
+//  * Authorization required: logged in user has isAdmin permission
 //  */
 
 router.patch("/:id", ensureAdminUser, async function (req, res, next) {
@@ -123,7 +123,7 @@ router.patch("/:id", ensureAdminUser, async function (req, res, next) {
 
 // /** DELETE /[id]  =>  { deleted: "job id: id" }
 //  *
-//  * Authorization: user has isAdmin permission
+//  * Authorization: logged in user has isAdmin permission
 //  */
 
 router.delete("/:id", ensureAdminUser, async function (req, res, next) {
