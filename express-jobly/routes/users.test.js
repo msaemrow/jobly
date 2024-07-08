@@ -128,7 +128,7 @@ describe("POST /users", function () {
 /************************************** GET /users */
 
 describe("GET /users", function () {
-  test("works for users", async function () {
+  test("works for logged in users", async function () {
     const resp = await request(app)
         .get("/users")
         .set("authorization", `Bearer ${u2Token}`);
@@ -165,14 +165,6 @@ describe("GET /users", function () {
   test("unauth for anon", async function () {
     const resp = await request(app)
         .get("/users");
-    expect(resp.statusCode).toEqual(401);
-  });
-
-  
-  test("unauth for non admin users", async function () {
-    const resp = await request(app)
-        .get("/users")
-        .set("authorization", `Bearer ${u1Token}`);
     expect(resp.statusCode).toEqual(401);
   });
 

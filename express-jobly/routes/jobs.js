@@ -14,7 +14,6 @@ const jobUpdateSchema = require("../schemas/jobUpdate.json");
 
 const router = new express.Router();
 
-
 /** POST / { job } =>  { job }
  *
  * job should be { title, salary, equity, company_handle }
@@ -28,7 +27,7 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, jobNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -54,24 +53,24 @@ router.get("/", ensureLoggedIn, async function (req, res, next) {
   try {
     const titleFilter = req.query.title;
     const salaryFilter = parseInt(req.query.salary);
-    const equityFilter = req.query.equity === 'true' ? true : false;
+    const equityFilter = req.query.equity === "true" ? true : false;
     let jobs;
-    if(titleFilter && salaryFilter && equityFilter){
-        jobs = await Job.filterByTitleMinSalaryEquity(titleFilter, salaryFilter);
-    }else if(titleFilter && salaryFilter){
-        jobs = await Job.filterByTitleAndMinSalary(titleFilter, salaryFilter);
-    }else if(titleFilter && equityFilter){
-        jobs = await Job.filterByTitleAndEquity(titleFilter);
-    }else if(salaryFilter && equityFilter){
-        jobs = await Job.filterByMinSalaryAndEquity(salaryFilter);
-    }else if(titleFilter){
-        jobs = await Job.filterByTitle(titleFilter);
-    }else if(salaryFilter){
-        jobs = await Job.filterByMinSalary(salaryFilter);
-    }else if(equityFilter){
-        jobs = await Job.filterForEquity();
-    }    else{
-        jobs = await Job.findAll()
+    if (titleFilter && salaryFilter && equityFilter) {
+      jobs = await Job.filterByTitleMinSalaryEquity(titleFilter, salaryFilter);
+    } else if (titleFilter && salaryFilter) {
+      jobs = await Job.filterByTitleAndMinSalary(titleFilter, salaryFilter);
+    } else if (titleFilter && equityFilter) {
+      jobs = await Job.filterByTitleAndEquity(titleFilter);
+    } else if (salaryFilter && equityFilter) {
+      jobs = await Job.filterByMinSalaryAndEquity(salaryFilter);
+    } else if (titleFilter) {
+      jobs = await Job.filterByTitle(titleFilter);
+    } else if (salaryFilter) {
+      jobs = await Job.filterByMinSalary(salaryFilter);
+    } else if (equityFilter) {
+      jobs = await Job.filterForEquity();
+    } else {
+      jobs = await Job.findAll();
     }
     return res.json({ jobs });
   } catch (err) {
@@ -110,7 +109,7 @@ router.patch("/:id", ensureAdminUser, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, jobUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -129,11 +128,10 @@ router.patch("/:id", ensureAdminUser, async function (req, res, next) {
 router.delete("/:id", ensureAdminUser, async function (req, res, next) {
   try {
     await Job.remove(req.params.id);
-    return res.json({deleted: `job id: ${req.params.id}`});
+    return res.json({ deleted: `job id: ${req.params.id}` });
   } catch (err) {
     return next(err);
   }
 });
-
 
 module.exports = router;

@@ -25,7 +25,7 @@ const router = express.Router();
  * This returns the newly created user and an authentication token for them:
  *  {user: { username, firstName, lastName, email, isAdmin }, token }
  *
- * Authorization required: login
+ * Authorization required: logged in user must be admin
  **/
 
 router.post("/", ensureAdminUser, async function (req, res, next) {
@@ -49,7 +49,7 @@ router.post("/", ensureAdminUser, async function (req, res, next) {
  *
  * Returns list of all users.
  *
- * Authorization required: login
+ * Authorization required: logged in user
  **/
 
 router.get("/", ensureLoggedIn, async function (req, res, next) {
